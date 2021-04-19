@@ -1,11 +1,47 @@
 var http = require('http');
 var fs = require('fs');
+var url = require('url');
+var qs = require('querystring');
+
+var indexPage = fs.readFileSync('./index.html', 'utf-8');
+
+//var nextPage = fs.readFileSync('./next.html', 'utf-8');
 var server = http.createServer(function(req, res) {
-  fs.readFile('./temp.html', 'utf-8', function(err, data) {
-    res.writeHead(200, {'Content-Type':'text/html'});
-    res.write(data);
-    res.end();
-  });
+  if(req.method == 'GET'){
+    var urlParts = url.parse(req.url, true);
+    console.log('--GET Request');
+    console.log('nameは' + urlParts.query.name);
+    console.log('ageは' + urlParts.query.age);
+  } else {
+    var body = '';
+    req.on('data', function(data){
+      body += data;
+    });
+    req.on('end', function() {
+      var params = qs.parse(body);
+      console.log('--POST Request');
+      console.log('nameは' + params.name);
+      console.log('ageは' + params.age);
+    });
+  }
+  //var target = '';
+  //switch (req.url) {
+  //  case '/':
+  //  case '/index':
+  //    target = indexPage;
+  //    break;
+  //  case '/next':
+  //    target = nextPage;
+  //    break;
+  //  default:
+  //    res.writeHead(404, {'Content-Type': 'text/plain'});
+  //    res.end('bd request');
+  //    return;
+  //}
+
+  res.writeHead(200, {'Content-Type':'text/html'});
+  res.write(indexPage);
+  res.end();
 });
 
 
